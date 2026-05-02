@@ -86,7 +86,7 @@ function getShinedLogo(frame: number): string[] {
   });
 }
 
-const LOGO_PAD = 2;
+const LOGO_PAD = 0;
 const LOGO_GAP = 4;
 
 // ── Types ───────────────────────────────────────────────────────────────────
