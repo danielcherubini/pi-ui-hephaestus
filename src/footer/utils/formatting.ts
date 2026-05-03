@@ -1,9 +1,12 @@
 export function formatTokenCount(count: number): string {
-  if (count < 1000) return count.toString();
-  if (count < 10000) return (count / 1000).toFixed(1) + "k";
-  if (count < 1000000) return Math.round(count / 1000) + "k";
-  if (count < 10000000) return (count / 1000000).toFixed(1) + "M";
-  return Math.round(count / 1000000) + "M";
+  const K = 1024;
+  const M = 1048576; // 1024 * 1024
+
+  if (count < K) return count.toString();
+  if (count < K * 10) return (count / K).toFixed(1) + "k";
+  if (count < M) return Math.round(count / K) + "k";
+  if (count < M * 10) return (count / M).toFixed(1) + "M";
+  return Math.round(count / M) + "M";
 }
 
 // Nerd Font icons
