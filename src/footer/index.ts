@@ -1,6 +1,8 @@
 /**
- * Custom Footer Extension — single line
- * dir | model | ◐thinking | branch [+status] | worktree | ↑↓R W $cost | ◐[stretch bar]%
+ * dir | model | ◐thinking | branch [+status] | worktree | ↑↓R W $cost | ━━━━━ context%
+ * Splits into two lines when terminal width < diffSplitMinWidth (default 150):
+ *   Line 1: system info (dir, branch, model, thinking, worktree)
+ *   Line 2: usage stats (↑↓R W $cost + context progress bar)
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
