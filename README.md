@@ -10,75 +10,88 @@
 
 </div>
 
-Hephaestus transforms the Pi coding agent terminal into a polished, information-rich workspace. It adds an animated splash screen, a framed editor with a double-press quit guard, muted thinking blocks, per-message response times, syntax-highlighted diff rendering for file writes and edits, and a compact footer that surfaces your git status, model, and context window usage at a glance.
+Hephaestus transforms the Pi coding agent terminal into a polished, information-rich workspace. It adds visual polish, useful context, and safety features — making your daily interaction with the coding agent feel more like a professional IDE and less like a raw terminal.
 
-## What's inside
+## Why Hephaestus?
 
-### Animated splash screen
+The default Pi TUI is functional but minimal. Hephaestus fills in the gaps:
 
-A smooth reveal animation greets you on startup — the Pi logo fades in diagonally, followed by version info, loaded context, prompts, skills, extensions, and themes. It gives the TUI a proper launch feel instead of an abrupt prompt.
+- **No more abrupt startup** — an animated splash screen greets you
+- **No more guessing** — git status, token usage, and context window are always visible
+- **No more blind edits** — diffs are syntax-highlighted so you can see exactly what changed
+- **No more accidental quits** — a double-press guard protects your work
 
-### Framed editor pane
+## Features
 
-The input area gets a clean bordered frame with a `▁` top edge and `▔` bottom edge, visually separating it from the chat history. There's also a **double-press quit guard**: pressing the clear key once shows a brief "press again to quit" hint, preventing accidental exits while you're mid-conversation.
+### 🎬 Animated splash screen
 
-### Muted thinking blocks
+A smooth reveal animation on startup: the Pi logo fades in diagonally, then version info and loaded context (models, prompts, skills, extensions, themes) appear with staggered fade-in. Gives the TUI a proper launch feel.
 
-Thinking (reasoning) content is rendered in muted colors so it doesn't compete with the actual response. Code blocks inside thinking sections are automatically unindented for readability. The label text and color are fully customizable through settings.
+### ✏️ Framed editor pane
 
-### Response time per message
+The input area gets a clean bordered frame with decorative `▁`/`▔` top/bottom edges, visually separating it from chat history. Includes a **double-press quit guard** — pressing the clear key once shows a "press again to quit" hint, preventing accidental exits mid-conversation.
 
-Each user message gets a right-aligned timer showing how long the AI took to respond — displayed as `12.3s` or `2m 14s` depending on duration. This makes it easy to spot which prompts trigger long reasoning cycles.
+### 🤫 Muted thinking blocks
 
-### Rich single-line footer
+Reasoning/thinking content renders in muted colors so it doesn't compete with actual responses. Code blocks inside thinking sections are automatically unindented for readability. The label text and color are fully customizable.
 
-A compact status bar at the bottom packs useful information without stealing vertical space:
+### ⏱️ Response times
 
-- **Directory** and **git branch** with clean/dirty indicator
-- **Active model** name
-- **Thinking level** indicator (when the agent is reasoning)
-- **Worktree branch** (if you're using one)
-- **Token usage** — input/output/cache counts and cost estimate
-- **Context window bar** — a progress bar showing how much of the context window is used, with color-coded warnings at 80% and 95%
+Each user message shows a right-aligned timer (`12.3s`, `2m 14s`) displaying how long the AI took to respond. Makes it easy to spot which prompts trigger long reasoning cycles.
 
-### Syntax-highlighted diff rendering
+### 📊 Rich single-line footer
 
-When the agent writes or edits files, Hephaestus renders a **Shiki-powered, syntax-highlighted diff** instead of plain text output. This makes it easy to see exactly what changed at a glance.
+A compact status bar at the bottom packs maximum information:
 
-- **Split view** (side-by-side) — old on left, new on right, with diagonal stripes filling empty slots
-- **Unified view** (stacked) fallback — single column with `+`/`-` gutter when the terminal is too narrow for split
-- **Word-level emphasis** — brighter backgrounds on changed characters so you see exactly what changed
-- **Auto-derives colors** from your Pi theme — diffs look good with any terminal background, no configuration needed
-- **Adaptive layout** — auto-detects terminal width; wraps on wide terminals, truncates on narrow ones
-- **Graceful degradation** — if Shiki fails to load, diffs still render as plain text with diff structure
+| Element | Description |
+|---------|-------------|
+| **Directory** | Current working directory name |
+| **Git branch** | With clean/dirty indicator (`●` staged, `~` unstaged, `U` untracked) |
+| **Model** | Active model name |
+| **Thinking** | Level indicator when agent is reasoning |
+| **Worktree** | Branch name if using git worktrees |
+| **Tokens** | ↑input ↓output R-read W-write + cost estimate |
+| **Context bar** | Progress bar with color warnings at 80% (yellow) and 95% (red) |
 
-## Installation
+### 🔍 Syntax-highlighted diff rendering
+
+When the agent writes or edits files, Hephaestus renders a **Shiki-powered diff** instead of plain text:
+
+- **Split view** — side-by-side old/new with diagonal stripes in empty slots
+- **Unified view** — stacked fallback when terminal is too narrow
+- **Word-level emphasis** — brighter backgrounds on changed characters
+- **Auto-derived colors** — diffs adapt to your Pi theme automatically
+- **Graceful degradation** — falls back to plain text if Shiki fails
+
+## Quick Start
 
 ```bash
+# Install globally
 npm install -g pi-ui-hephaestus
+
+# Restart Pi — Hephaestus loads automatically
+pi
 ```
 
-The extension loads automatically when Pi detects it in your global npm packages. No configuration needed to get started.
+That's it. No configuration needed — everything works out of the box with sensible defaults.
 
 ## Settings
 
-Run the `/hephaestus` slash command to open the interactive settings panel:
+Run the `/hephaestus` slash command to open the interactive settings panel. Navigate with arrow keys, press Enter to toggle or edit, Save to persist, ESC to cancel.
 
-| Setting | Description | Default |
-|---|---|---|
-| **Muted Theme** | Use subdued colors for thinking blocks | Off |
-| **Code Unindent** | Remove 2-space indent from code blocks inside thinking sections | On |
-| **Label Text** | Custom prefix shown before thinking blocks | `Thinking...` |
-| **Label Color** | RGB color for the thinking label | `255,215,0` |
-| **Diff Theme** | Shiki syntax-highlighting theme for diffs | `github-dark` |
-| **Split Min Width** | Min terminal columns for split view (≥ 100) | `150` |
-| **Split Min Code Width** | Min code columns per side in split (≥ 30) | `60` |
+| Setting | Type | Default | Description |
+|---------|------|---------|-------------|
+| **Muted Theme** | Toggle | Off | Use subdued colors for thinking blocks |
+| **Code Unindent** | Toggle | On | Remove common indentation from code blocks inside thinking sections |
+| **Label Text** | Text | `Thinking...` | Custom prefix shown before thinking blocks |
+| **Label Color** | Text | `255,215,0` | RGB color for the thinking label (e.g. `255,215,0`) |
+| **Diff Theme** | Text | `github-dark` | Shiki syntax-highlighting theme for diffs |
+| **Split Min Width** | Number | `150` | Minimum terminal columns to show split diff view (≥ 100) |
+| **Split Min Code Width** | Number | `60` | Minimum code columns per side in split view (≥ 30) |
 
-Navigate with arrow keys, press Enter to toggle or open submenus, and use the **Save** button at the bottom to persist changes. Press **ESC** to cancel without saving.
+### Configuration file
 
-## Configuration
-
-Settings are stored in `~/.pi/agent/settings.json` under the `"hephaestus"` key:
+Settings are persisted in `~/.pi/agent/settings.json` under the `"hephaestus"` key:
 
 ```json
 {
@@ -94,7 +107,33 @@ Settings are stored in `~/.pi/agent/settings.json` under the `"hephaestus"` key:
 }
 ```
 
-You can also edit this file directly to fine-tune values.
+You can edit this file directly for fine-tuning. Changes take effect on the next session.
+
+## Architecture
+
+Hephaestus is structured as a collection of focused modules:
+
+```
+src/
+├── index.ts              ← Thin orchestrator — wires everything together
+├── config.ts             ← Configuration loading/saving
+├── settings.ts           ← Settings UI with factory-based submenus
+├── chrome.ts             ← Editor chrome constants and palette resolution
+│
+├── utils/
+│   ├── ansi.ts           ← Unified ANSI utilities (stripAnsi, stripSgr, etc.)
+│   ├── text.ts           ← Text formatting (clampLine, isParentBorder)
+│   └── color.ts          ← HSL/RGB color math utilities
+│
+├── editor/index.ts       ← Custom editor with quit guard
+├── footer/               ← Status bar (git, tokens, context window)
+├── message/index.ts      ← Response time patching
+├── startup/              ← Animated splash screen (logo, sections, version)
+├── thinking/             ← Muted thinking block rendering
+└── diff-render/          ← Shiki-powered diff rendering
+```
+
+Each module has a single responsibility and communicates through well-defined interfaces. The main entry point (`index.ts`) is a thin orchestrator that wires modules together.
 
 ## Requirements
 
