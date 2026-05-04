@@ -1,4 +1,3 @@
-import { visibleWidth } from "@mariozechner/pi-tui";
 import { gray, rgb, extractRgb, lerp } from "../utils/index.js";
 
 // ── Truecolor detection ────────────────────────────────────────────────

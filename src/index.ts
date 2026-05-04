@@ -3,7 +3,7 @@ import type { Theme } from "@mariozechner/pi-coding-agent";
 import { TUI, EditorTheme, Component } from "@mariozechner/pi-tui";
 
 import registerFooter from "./footer/index.js";
-import { registerDiffTools, type HephaestusDiffConfig } from "./diff-render/index.js";
+import { registerDiffTools } from "./diff-render/index.js";
 import { patchThinkingRenderer } from "./thinking/patch.js";
 import { transformThinkingContent } from "./thinking/transform.js";
 import { HephaestusEditor } from "./editor/index.js";

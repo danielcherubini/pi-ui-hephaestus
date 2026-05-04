@@ -13,7 +13,6 @@ export function stripSgr(s: string): string {
 // --- Color helpers (moved from startup/index.ts) ---
 const ESC_RE = "\u001b";
 const ANSI_CAPTURE_RE = new RegExp(`${ESC_RE}\\[([^m]*)m`, "g");
-const ANSI_PARAM_CAPTURE_RE = new RegExp(`${ESC_RE}\\[([0-9;]*)m`, "g");
 
 function gray(level: number, text: string): string {
   const l = Math.max(0, Math.min(255, Math.floor(level)));
