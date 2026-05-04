@@ -18,6 +18,7 @@ import {
 } from "@mariozechner/pi-tui";
 
 import registerFooter from "./footer/index.js";
+import { registerDiffTools, type HephaestusDiffConfig } from "./diff-render/index.js";
 
 const SETTINGS_PATH = join(getAgentDir(), "settings.json");
 import { patchThinkingRenderer } from "./thinking/patch.js";
@@ -63,7 +64,7 @@ function patchConsoleLog(): void {
 
 // ── Config persistence ─────────────────────────────────────────────────────
 
-interface HephaestusConfig {
+interface HephaestusConfig extends HephaestusDiffConfig {
   mutedTheme: boolean;
   codeUnindent: boolean;
   labelText: string;
@@ -76,6 +77,9 @@ function loadConfig(): HephaestusConfig {
     codeUnindent: true,
     labelText: "Thinking...",
     labelColor: "255,215,0",
+    diffTheme: "github-dark",
+    diffSplitMinWidth: 150,
+    diffSplitMinCodeWidth: 60,
   };
 
   if (existsSync(SETTINGS_PATH)) {
@@ -110,6 +114,9 @@ function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
     codeUnindent: true,
     labelText: "Thinking...",
     labelColor: "255,215,0",
+    diffTheme: "github-dark",
+    diffSplitMinWidth: 150,
+    diffSplitMinCodeWidth: 60,
   };
 
   // Load saved config from session entries
@@ -118,6 +125,9 @@ function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
   config.codeUnindent = savedConfig.codeUnindent;
   config.labelText = savedConfig.labelText;
   config.labelColor = savedConfig.labelColor;
+  config.diffTheme = savedConfig.diffTheme;
+  config.diffSplitMinWidth = savedConfig.diffSplitMinWidth;
+  config.diffSplitMinCodeWidth = savedConfig.diffSplitMinCodeWidth;
 
   ctx.ui.custom((tui: TUI, theme: Theme, keybindings: KeybindingsManager, done: (result: HephaestusConfig) => void) => {
     const items: SettingItem[] = [
@@ -208,6 +218,97 @@ function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
         },
       },
       {
+        id: "diffTheme",
+        label: "Diff Theme",
+        description: "Shiki syntax-highlighting theme for diffs",
+        currentValue: config.diffTheme,
+        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
+          const state = { value: currentValue };
+          return {
+            invalidate(): void { /* no-op */ },
+            render(): string[] {
+              return [
+                "Enter Shiki theme (ESC to cancel):",
+                "",
+                `  ${state.value}`,
+                "",
+                "ESC: cancel | ENTER: confirm",
+              ];
+            },
+            handleInput(data: string): void {
+              if (data === "\x1b") { done(); return; }
+              if (data === "\r" || data === "\n") { done(state.value); return; }
+              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
+              else if (data.length === 1) { state.value += data; }
+            },
+          };
+        },
+      },
+      {
+        id: "diffSplitMinWidth",
+        label: "Split Min Width",
+        description: "Min terminal columns for split view (≥ 100)",
+        currentValue: String(config.diffSplitMinWidth),
+        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
+          const state = { value: currentValue };
+          return {
+            invalidate(): void { /* no-op */ },
+            render(): string[] {
+              return [
+                "Enter min width (ESC to cancel):",
+                "",
+                `  ${state.value}`,
+                "",
+                "ESC: cancel | ENTER: confirm (min 100)",
+              ];
+            },
+            handleInput(data: string): void {
+              if (data === "\x1b") { done(); return; }
+              if (data === "\r" || data === "\n") {
+                const n = parseInt(state.value, 10);
+                if (Number.isFinite(n) && n >= 100) done(String(n));
+                else done();
+                return;
+              }
+              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
+              else if (/^\d$/.test(data)) { state.value += data; }
+            },
+          };
+        },
+      },
+      {
+        id: "diffSplitMinCodeWidth",
+        label: "Split Min Code Width",
+        description: "Min code columns per side in split (≥ 30)",
+        currentValue: String(config.diffSplitMinCodeWidth),
+        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
+          const state = { value: currentValue };
+          return {
+            invalidate(): void { /* no-op */ },
+            render(): string[] {
+              return [
+                "Enter min code width (ESC to cancel):",
+                "",
+                `  ${state.value}`,
+                "",
+                "ESC: cancel | ENTER: confirm (min 30)",
+              ];
+            },
+            handleInput(data: string): void {
+              if (data === "\x1b") { done(); return; }
+              if (data === "\r" || data === "\n") {
+                const n = parseInt(state.value, 10);
+                if (Number.isFinite(n) && n >= 30) done(String(n));
+                else done();
+                return;
+              }
+              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
+              else if (/^\d$/.test(data)) { state.value += data; }
+            },
+          };
+        },
+      },
+      {
         id: "save",
         label: "Save",
         description: "Save changes and exit",
@@ -230,6 +331,15 @@ function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
           break;
         case "labelColor":
           config.labelColor = newValue;
+          break;
+        case "diffTheme":
+          config.diffTheme = newValue;
+          break;
+        case "diffSplitMinWidth":
+          config.diffSplitMinWidth = parseInt(newValue, 10);
+          break;
+        case "diffSplitMinCodeWidth":
+          config.diffSplitMinCodeWidth = parseInt(newValue, 10);
           break;
         case "save":
           saveConfig(config);
@@ -298,6 +408,12 @@ export default function (pi: ExtensionAPI): void {
 
     // Patch user message response time
     patchUserMessage(() => ctx.ui.theme, responseTimes);
+
+    // Load config for diff tools
+    const config = loadConfig();
+
+    // Register diff-enhanced write/edit tools
+    registerDiffTools(pi, () => ctx.ui.theme, () => loadConfig());
 
     // Register events
     pi.on("message_end", (event, _ctx) => {
