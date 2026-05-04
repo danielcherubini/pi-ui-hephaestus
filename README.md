@@ -10,7 +10,7 @@
 
 </div>
 
-Hephaestus transforms the Pi coding agent terminal into a polished, information-rich workspace. It adds an animated splash screen, a framed editor with a double-press quit guard, muted thinking blocks, per-message response times, and a compact footer that surfaces your git status, model, and context window usage at a glance.
+Hephaestus transforms the Pi coding agent terminal into a polished, information-rich workspace. It adds an animated splash screen, a framed editor with a double-press quit guard, muted thinking blocks, per-message response times, syntax-highlighted diff rendering for file writes and edits, and a compact footer that surfaces your git status, model, and context window usage at a glance.
 
 ## What's inside
 
@@ -41,9 +41,16 @@ A compact status bar at the bottom packs useful information without stealing ver
 - **Token usage** — input/output/cache counts and cost estimate
 - **Context window bar** — a progress bar showing how much of the context window is used, with color-coded warnings at 80% and 95%
 
-<div align="center">
-  <img src="docs/splash-screen.png" width="960" alt="Hephaestus in action — splash screen, framed editor, and rich footer visible">
-</div>
+### Syntax-highlighted diff rendering
+
+When the agent writes or edits files, Hephaestus renders a **Shiki-powered, syntax-highlighted diff** instead of plain text output. This makes it easy to see exactly what changed at a glance.
+
+- **Split view** (side-by-side) for `edit` tool — old on left, new on right, with diagonal stripes filling empty slots
+- **Unified view** (stacked) for `write` tool overwrites — single column with `+`/`-` gutter
+- **Word-level emphasis** — brighter backgrounds on changed characters so you see exactly what changed
+- **Auto-derives colors** from your Pi theme — diffs look good with any terminal background, no configuration needed
+- **Adaptive layout** — auto-detects terminal width; wraps on wide terminals, truncates on narrow ones
+- **Graceful degradation** — if Shiki fails to load, diffs still render as plain text with diff structure
 
 ## Installation
 
@@ -63,6 +70,9 @@ Run the `/hephaestus` slash command to open the interactive settings panel:
 | **Code Unindent** | Remove 2-space indent from code blocks inside thinking sections | On |
 | **Label Text** | Custom prefix shown before thinking blocks | `Thinking...` |
 | **Label Color** | RGB color for the thinking label | `255,215,0` |
+| **Diff Theme** | Shiki syntax-highlighting theme for diffs | `github-dark` |
+| **Split Min Width** | Min terminal columns for split view (≥ 100) | `150` |
+| **Split Min Code Width** | Min code columns per side in split (≥ 30) | `60` |
 
 Navigate with arrow keys, press Enter to toggle or open submenus, and use the **Save** button at the bottom to persist changes. Press **ESC** to cancel without saving.
 
@@ -76,7 +86,10 @@ Settings are stored in `~/.pi/agent/settings.json` under the `"hephaestus"` key:
     "mutedTheme": false,
     "codeUnindent": true,
     "labelText": "Thinking...",
-    "labelColor": "255,215,0"
+    "labelColor": "255,215,0",
+    "diffTheme": "github-dark",
+    "diffSplitMinWidth": 150,
+    "diffSplitMinCodeWidth": 60
   }
 }
 ```
