@@ -1,7 +1,19 @@
-export const stripAnsi = (s: string) => s.replace(/\x1b\[[0-9;]*m/g, "");
+import { truncateToWidth } from "@mariozechner/pi-tui";
+import { stripSgr } from "./ansi.js";
 
+/** Clamp a line to maxW visible characters, preserving ANSI escapes. */
+export function clampLine(line: string, maxW: number): string {
+  return truncateToWidth(line, maxW);
+}
+
+/** Clamp an array of lines to maxW visible characters each. */
+export function clampLines(lines: string[], maxW: number): string[] {
+  return lines.map((l) => clampLine(l, maxW));
+}
+
+// isParentBorder uses the narrow SGR-only strip (no trim) for char-level checks
 export const isParentBorder = (s: string) => {
-  const clean = stripAnsi(s);
+  const clean = stripSgr(s);
   return clean.length > 0 && clean[0] === "─";
 };
 

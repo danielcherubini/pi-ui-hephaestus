@@ -1,5 +1,5 @@
 import type { Theme, UserMessageComponent } from "@mariozechner/pi-coding-agent";
-import { RESET, resolvePalette, setThemeBg } from "../visual.js";
+import { RESET, resolvePalette, setThemeBg } from "../chrome.js";
 
 type UserMsgCtor = typeof UserMessageComponent & { [PATCHED]?: boolean };
 

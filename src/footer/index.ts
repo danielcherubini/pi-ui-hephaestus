@@ -7,8 +7,9 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
 import { getGitStatus, getWorktreeBranch } from "./utils/git.js";
 import { getContextWindowInfo, getTokenUsageStats } from "./utils/stats.js";
-import { formatContextBar, formatGitStatusIndicators, formatThinkingIndicator, footerIcons, formatTokenCount } from "./utils/formatting.js";
-import { clampLine } from "../shared.js";
+import { formatContextBar, formatGitStatusIndicators, formatThinkingIndicator, formatTokenCount } from "./utils/format.js";
+import { footerIcons } from "./utils/icons.js";
+import { clampLine } from "../utils/text.js";
 
 export default function(pi: ExtensionAPI) {
   pi.on("session_start", (_event, ctx) => {

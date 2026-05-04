@@ -1,361 +1,17 @@
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
-import {
-  ExtensionAPI,
-  ExtensionContext,
-  ExtensionCommandContext,
-  KeybindingsManager,
-  getSettingsListTheme,
-  getAgentDir,
-} from "@mariozechner/pi-coding-agent";
+import { ExtensionAPI, ExtensionContext, ExtensionCommandContext, KeybindingsManager } from "@mariozechner/pi-coding-agent";
 import type { Theme } from "@mariozechner/pi-coding-agent";
-import {
-  SettingsList,
-  SettingItem,
-  TUI,
-  EditorTheme,
-  Component,
-} from "@mariozechner/pi-tui";
+import { TUI, EditorTheme, Component } from "@mariozechner/pi-tui";
 
 import registerFooter from "./footer/index.js";
-import { registerDiffTools, type HephaestusDiffConfig } from "./diff-render/index.js";
-
-const SETTINGS_PATH = join(getAgentDir(), "settings.json");
+import { registerDiffTools } from "./diff-render/index.js";
 import { patchThinkingRenderer } from "./thinking/patch.js";
 import { transformThinkingContent } from "./thinking/transform.js";
 import { HephaestusEditor } from "./editor/index.js";
 import { patchUserMessage, resetInstanceCount } from "./message/index.js";
 import { renderHeader, patchStartupListing, ListingRef } from "./startup/index.js";
-
-// ── Globals (module-level, survive hot-reload via Symbol keys) ──────────────
-
-const g: Record<string | symbol, unknown> = globalThis as unknown as typeof global & Record<string | symbol, unknown>;
-
-const MODEL_SCOPE_RE = /Model scope:\s*(.+)/;
-const CAPTURED_MODELS = Symbol.for("splashscreen:capturedModels");
-const PATCHED_LOG = Symbol.for("splashscreen:logPatched");
-
-// ── Model scope capture ────────────────────────────────────────────────────
-
-function patchConsoleLog(): void {
-  if (g[PATCHED_LOG]) return;
-  g[PATCHED_LOG] = true;
-  const origLog = console.log;
-  console.log = (...args: unknown[]) => {
-    try {
-      if (args.length === 1 && typeof args[0] === "string") {
-        const plain = (args[0] as string).replace(/\x1b\[[0-9;]*[a-zA-Z]/g, "");
-        const m = MODEL_SCOPE_RE.exec(plain);
-        if (m) {
-          const raw = m[1].replace(/\s*\(Ctrl\+\w[\w\s]*\)/gi, "");
-          g[CAPTURED_MODELS] = raw
-            .split(",")
-            .map((s: string) => s.trim())
-            .filter(Boolean);
-          return;
-        }
-      }
-    } catch {
-      /* ignore errors in patching logic */
-    }
-    origLog.apply(console, args);
-  };
-}
-
-// ── Config persistence ─────────────────────────────────────────────────────
-
-interface HephaestusConfig extends HephaestusDiffConfig {
-  mutedTheme: boolean;
-  codeUnindent: boolean;
-  labelText: string;
-  labelColor: string;
-}
-
-function loadConfig(): HephaestusConfig {
-  const defaultConfig: HephaestusConfig = {
-    mutedTheme: false,
-    codeUnindent: true,
-    labelText: "Thinking...",
-    labelColor: "255,215,0",
-    diffTheme: "github-dark",
-    diffSplitMinWidth: 150,
-    diffSplitMinCodeWidth: 60,
-  };
-
-  if (existsSync(SETTINGS_PATH)) {
-    try {
-      const full = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-      return { ...defaultConfig, ...(full.hephaestus ?? {}) };
-    } catch {
-      /* ignore corrupt file */
-    }
-  }
-  return defaultConfig;
-}
-
-function saveConfig(config: HephaestusConfig): void {
-  let full: Record<string, unknown> = {};
-  if (existsSync(SETTINGS_PATH)) {
-    try {
-      full = JSON.parse(readFileSync(SETTINGS_PATH, "utf-8"));
-    } catch {
-      /* ignore corrupt file */
-    }
-  }
-  full.hephaestus = config;
-  writeFileSync(SETTINGS_PATH, JSON.stringify(full, null, 2), "utf-8");
-}
-
-// ── Settings UI ────────────────────────────────────────────────────────────
-
-function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
-  const config: HephaestusConfig = {
-    mutedTheme: false,
-    codeUnindent: true,
-    labelText: "Thinking...",
-    labelColor: "255,215,0",
-    diffTheme: "github-dark",
-    diffSplitMinWidth: 150,
-    diffSplitMinCodeWidth: 60,
-  };
-
-  // Load saved config from session entries
-  const savedConfig = loadConfig();
-  config.mutedTheme = savedConfig.mutedTheme;
-  config.codeUnindent = savedConfig.codeUnindent;
-  config.labelText = savedConfig.labelText;
-  config.labelColor = savedConfig.labelColor;
-  config.diffTheme = savedConfig.diffTheme;
-  config.diffSplitMinWidth = savedConfig.diffSplitMinWidth;
-  config.diffSplitMinCodeWidth = savedConfig.diffSplitMinCodeWidth;
-
-  ctx.ui.custom((tui: TUI, theme: Theme, keybindings: KeybindingsManager, done: (result: HephaestusConfig) => void) => {
-    const items: SettingItem[] = [
-      {
-        id: "mutedTheme",
-        label: "Muted Theme",
-        description: "Use muted colors for thinking blocks",
-        currentValue: config.mutedTheme ? "On" : "Off",
-        values: ["On", "Off"],
-      },
-      {
-        id: "codeUnindent",
-        label: "Code Unindent",
-        description: "Remove 2-space indent from code blocks",
-        currentValue: config.codeUnindent ? "On" : "Off",
-        values: ["On", "Off"],
-      },
-      {
-        id: "labelText",
-        label: "Label Text",
-        description: "Text shown before thinking blocks",
-        currentValue: config.labelText,
-        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
-          const state = { value: currentValue };
-          return {
-            invalidate(): void { /* no-op */ },
-            render(): string[] {
-              return [
-                "Enter label text (ESC to cancel):",
-                "",
-                `  ${state.value}`,
-                "",
-                "ESC: cancel | ENTER: confirm",
-              ];
-            },
-            handleInput(data: string): void {
-              if (data === "\x1b") {
-                done();
-                return;
-              }
-              if (data === "\r" || data === "\n") {
-                done(state.value);
-                return;
-              }
-              if (data === "\x7f" || data === "\x08") {
-                state.value = state.value.slice(0, -1);
-              } else if (data.length === 1) {
-                state.value += data;
-              }
-            },
-          };
-        },
-      },
-      {
-        id: "labelColor",
-        label: "Label Color",
-        description: "RGB color for thinking label (e.g. 255,215,0)",
-        currentValue: config.labelColor,
-        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
-          const state = { value: currentValue };
-          return {
-            invalidate(): void { /* no-op */ },
-            render(): string[] {
-              return [
-                "Enter RGB color (ESC to cancel):",
-                "",
-                `  ${state.value}`,
-                "",
-                "ESC: cancel | ENTER: confirm",
-              ];
-            },
-            handleInput(data: string): void {
-              if (data === "\x1b") {
-                done();
-                return;
-              }
-              if (data === "\r" || data === "\n") {
-                done(state.value);
-                return;
-              }
-              if (data === "\x7f" || data === "\x08") {
-                state.value = state.value.slice(0, -1);
-              } else if (data.length === 1) {
-                state.value += data;
-              }
-            },
-          };
-        },
-      },
-      {
-        id: "diffTheme",
-        label: "Diff Theme",
-        description: "Shiki syntax-highlighting theme for diffs",
-        currentValue: config.diffTheme,
-        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
-          const state = { value: currentValue };
-          return {
-            invalidate(): void { /* no-op */ },
-            render(): string[] {
-              return [
-                "Enter Shiki theme (ESC to cancel):",
-                "",
-                `  ${state.value}`,
-                "",
-                "ESC: cancel | ENTER: confirm",
-              ];
-            },
-            handleInput(data: string): void {
-              if (data === "\x1b") { done(); return; }
-              if (data === "\r" || data === "\n") { done(state.value); return; }
-              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
-              else if (data.length === 1) { state.value += data; }
-            },
-          };
-        },
-      },
-      {
-        id: "diffSplitMinWidth",
-        label: "Split Min Width",
-        description: "Min terminal columns for split view (≥ 100)",
-        currentValue: String(config.diffSplitMinWidth),
-        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
-          const state = { value: currentValue };
-          return {
-            invalidate(): void { /* no-op */ },
-            render(): string[] {
-              return [
-                "Enter min width (ESC to cancel):",
-                "",
-                `  ${state.value}`,
-                "",
-                "ESC: cancel | ENTER: confirm (min 100)",
-              ];
-            },
-            handleInput(data: string): void {
-              if (data === "\x1b") { done(); return; }
-              if (data === "\r" || data === "\n") {
-                const n = parseInt(state.value, 10);
-                if (Number.isFinite(n) && n >= 100) done(String(n));
-                else done();
-                return;
-              }
-              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
-              else if (/^\d$/.test(data)) { state.value += data; }
-            },
-          };
-        },
-      },
-      {
-        id: "diffSplitMinCodeWidth",
-        label: "Split Min Code Width",
-        description: "Min code columns per side in split (≥ 30)",
-        currentValue: String(config.diffSplitMinCodeWidth),
-        submenu: (currentValue: string, done: (selectedValue?: string) => void) => {
-          const state = { value: currentValue };
-          return {
-            invalidate(): void { /* no-op */ },
-            render(): string[] {
-              return [
-                "Enter min code width (ESC to cancel):",
-                "",
-                `  ${state.value}`,
-                "",
-                "ESC: cancel | ENTER: confirm (min 30)",
-              ];
-            },
-            handleInput(data: string): void {
-              if (data === "\x1b") { done(); return; }
-              if (data === "\r" || data === "\n") {
-                const n = parseInt(state.value, 10);
-                if (Number.isFinite(n) && n >= 30) done(String(n));
-                else done();
-                return;
-              }
-              if (data === "\x7f" || data === "\x08") { state.value = state.value.slice(0, -1); }
-              else if (/^\d$/.test(data)) { state.value += data; }
-            },
-          };
-        },
-      },
-      {
-        id: "save",
-        label: "Save",
-        description: "Save changes and exit",
-        currentValue: "",
-        values: ["Save"],
-      },
-    ];
-
-    const settingsList = new SettingsList(items, 10, getSettingsListTheme(), (id: string, newValue: string) => {
-      // Update config values when settings change
-      switch (id) {
-        case "mutedTheme":
-          config.mutedTheme = newValue === "On";
-          break;
-        case "codeUnindent":
-          config.codeUnindent = newValue === "On";
-          break;
-        case "labelText":
-          config.labelText = newValue;
-          break;
-        case "labelColor":
-          config.labelColor = newValue;
-          break;
-        case "diffTheme":
-          config.diffTheme = newValue;
-          break;
-        case "diffSplitMinWidth":
-          config.diffSplitMinWidth = parseInt(newValue, 10);
-          break;
-        case "diffSplitMinCodeWidth":
-          config.diffSplitMinCodeWidth = parseInt(newValue, 10);
-          break;
-        case "save":
-          saveConfig(config);
-          done(config);
-          return;
-      }
-    }, () => {
-      // ESC cancels without saving
-      done(config);
-    });
-
-    return settingsList;
-  });
-}
-
-// ── Extension factory ──────────────────────────────────────────────────────
+import { patchConsoleLog } from "./startup/capture.js";
+import { openSettings } from "./settings.js";
+import { loadConfig, type HephaestusConfig } from "./config.js";
 
 export default function (pi: ExtensionAPI): void {
   // Patch console.log for model scope capture
@@ -377,11 +33,8 @@ export default function (pi: ExtensionAPI): void {
     };
     const headerFactory = (tui: TUI, theme: Theme): Component & { dispose?(): void } => {
       const comp: Component & { dispose?(): void } = {
-        invalidate(): void {
-          // No cached state to invalidate
-        },
+        invalidate(): void { /* no-op */ },
         render(width: number): string[] {
-          // -1 footer, -2 spacers (header container wraps custom header with Spacer(1) top/bottom)
           return renderHeader(theme, ref, width, tui.terminal.rows - 3);
         },
       };
@@ -409,9 +62,6 @@ export default function (pi: ExtensionAPI): void {
     // Patch user message response time
     patchUserMessage(() => ctx.ui.theme, responseTimes);
 
-    // Load config for diff tools
-    const config = loadConfig();
-
     // Register diff-enhanced write/edit tools
     registerDiffTools(pi, () => ctx.ui.theme, () => loadConfig());
 
@@ -430,10 +80,9 @@ export default function (pi: ExtensionAPI): void {
 
     pi.on("session_shutdown", (_event, _ctx) => {
       // Clear animation intervals
-      const ref: ListingRef = g["listingRef"] as ListingRef;
-      if (ref) {
-        ref.settled = true;
-      }
+      const g: Record<string | symbol, unknown> = globalThis as unknown as typeof global & Record<string | symbol, unknown>;
+      const ref = g["listingRef"] as ListingRef | undefined;
+      if (ref) { ref.settled = true; }
 
       // Clear response times
       responseTimes.length = 0;
