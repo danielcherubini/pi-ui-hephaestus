@@ -20,7 +20,7 @@ import {
   AUTOCOMPLETE_CURSOR,
   HINT_MARGIN_RIGHT,
   resolvePalette,
-} from "../visual.js";
+} from "../chrome.js";
 import { isParentBorder, formatKey } from "../utils.js";
 
 const DOUBLE_PRESS_WINDOW_MS = 500;
