@@ -8,7 +8,7 @@ import {
   rgbToHsl,
   rgbToTruecolorFg,
   hexToRgb,
-} from "./hsl.js";
+} from "../utils/color.js";
 
 export interface MutedThemeOptions {
   saturationFactor?: number; // default 0.5

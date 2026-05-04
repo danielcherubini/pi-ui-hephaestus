@@ -43,10 +43,10 @@ export let BG_BASE = BG_DEFAULT; // tool box base bg — updated from theme's to
 // ANSI manipulation
 // ---------------------------------------------------------------------------
 
+import { stripSgr } from "../utils/ansi.js";
+
 /** Strip all ANSI escape codes from a string. */
-export function strip(s: string): string {
-	return s.replace(ANSI_RE, "");
-}
+export const strip = stripSgr;
 
 /** Replace tabs with 2 spaces. */
 export function tabs(s: string): string {

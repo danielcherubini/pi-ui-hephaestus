@@ -21,7 +21,7 @@ import {
   HINT_MARGIN_RIGHT,
   resolvePalette,
 } from "../chrome.js";
-import { isParentBorder, formatKey } from "../utils.js";
+import { isParentBorder, formatKey } from "../utils/text.js";
 
 const DOUBLE_PRESS_WINDOW_MS = 500;
 
