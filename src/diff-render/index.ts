@@ -12,7 +12,7 @@ import * as Ansi from "./ansi.js";
 import { resolveDiffColors, themeCacheKey, DEFAULT_DIFF_COLORS } from "./ansi.js";
 import { setConfigGetter as setShikiConfig } from "./shiki.js";
 import { hlBlock, lang } from "./shiki.js";
-import { renderSplit, renderUnified } from "./render.js";
+import { renderSplit } from "./render.js";
 import { setConfigGetter as setRenderConfig } from "./render.js";
 
 // ---------------------------------------------------------------------------

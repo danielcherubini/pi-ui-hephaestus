@@ -45,8 +45,8 @@ A compact status bar at the bottom packs useful information without stealing ver
 
 When the agent writes or edits files, Hephaestus renders a **Shiki-powered, syntax-highlighted diff** instead of plain text output. This makes it easy to see exactly what changed at a glance.
 
-- **Split view** (side-by-side) for `edit` tool — old on left, new on right, with diagonal stripes filling empty slots
-- **Unified view** (stacked) for `write` tool overwrites — single column with `+`/`-` gutter
+- **Split view** (side-by-side) — old on left, new on right, with diagonal stripes filling empty slots
+- **Unified view** (stacked) fallback — single column with `+`/`-` gutter when the terminal is too narrow for split
 - **Word-level emphasis** — brighter backgrounds on changed characters so you see exactly what changed
 - **Auto-derives colors** from your Pi theme — diffs look good with any terminal background, no configuration needed
 - **Adaptive layout** — auto-detects terminal width; wraps on wide terminals, truncates on narrow ones
