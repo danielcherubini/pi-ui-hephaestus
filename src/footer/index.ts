@@ -1,6 +1,8 @@
 /**
- * Custom Footer Extension — single line
- * dir | model | ◐thinking | branch [+status] | worktree | ↑↓R W $cost | ◐[stretch bar]%
+ * dir | model | ◐thinking | branch [+status] | worktree | ↑↓R W $cost | ━━━━━ context%
+ * Splits into two lines when terminal width < diffSplitMinWidth (default 150):
+ *   Line 1: system info (dir, branch, model, thinking, worktree)
+ *   Line 2: usage stats (↑↓R W $cost + context progress bar)
  */
 
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
@@ -10,9 +12,12 @@ import { getContextWindowInfo, getTokenUsageStats } from "./utils/stats.js";
 import { formatContextBar, formatGitStatusIndicators, formatThinkingIndicator, formatTokenCount } from "./utils/format.js";
 import { footerIcons } from "./utils/icons.js";
 import { clampLine } from "../utils/text.js";
+import { loadConfig } from "../config.js";
 
 export default function(pi: ExtensionAPI) {
   pi.on("session_start", (_event, ctx) => {
+    const splitThreshold = loadConfig().diffSplitMinWidth;
+
     ctx.ui.setFooter((tui, theme, footerData) => {
       const unsubscribe = footerData.onBranchChange(() => tui.requestRender());
 
@@ -31,7 +36,9 @@ export default function(pi: ExtensionAPI) {
             const { totalInput, totalOutput, totalCacheRead, totalCacheWrite, totalCost } = getTokenUsageStats(ctx);
             const { percent: contextPercent, percentValue: contextPercentValue, windowSize: contextWindowSize } = getContextWindowInfo(ctx);
 
-            // ── Single-line footer ─────────────────────────────────────────────
+            // ── Two-line split for narrow terminals ────────────────────────────
+
+            const shouldSplit = width < splitThreshold;
 
             // Thinking display
             const thinkingIndicatorStr = formatThinkingIndicator(thinkingLevel, colorize);
@@ -74,6 +81,34 @@ export default function(pi: ExtensionAPI) {
 
             const rawStatsSectionStr = statsParts.join(" ");
             const statsSectionStr = theme.fg("dim", rawStatsSectionStr);
+
+            if (shouldSplit) {
+              // ── Two-line mode ──────────────────────────────────────────────
+
+              // Calculate available space for the context progress bar on line 2
+              const availableBarSpace = Math.max(2, width - visibleWidth(statsSectionStr) - 13);
+
+              // Context progress bar (expands to fill remaining space)
+              const contextBarStr = formatContextBar(colorize as (token: string, s: string) => string, contextPercentValue, availableBarSpace);
+
+              // Assemble line 2: stats | bar
+              const rightSections: string[] = [];
+              if (statsSectionStr) rightSections.push(statsSectionStr);
+              if (contextBarStr) rightSections.push(contextBarStr);
+              const rightSectionStr = rightSections.join(theme.fg("dim", " | "));
+
+              // Edge case: if both stats and bar are empty, return only line 1
+              if (!rightSectionStr) {
+                return [clampLine(leftSectionStr, width)];
+              }
+
+              return [
+                clampLine(leftSectionStr, width),
+                clampLine(rightSectionStr, width),
+              ];
+            }
+
+            // ── Single-line mode ───────────────────────────────────────────────
 
             // Separator between left and right sections
             const sectionSeparator = theme.fg("dim", " | ");
