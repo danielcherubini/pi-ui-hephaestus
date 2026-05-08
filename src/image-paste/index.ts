@@ -6,7 +6,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import { getAgentDir } from "@mariozechner/pi-coding-agent";
 import type { KeyId } from "@mariozechner/pi-tui";
 
-import { readClipboardImage, isImageFilePath, readFileAsImage } from "./clipboard.js";
+import { readClipboardImage } from "./clipboard.js";
 import { registerImagePreview, sendPreviewMessage } from "./preview.js";
 import type { ClipboardImage, PendingImage, ImageMarker } from "./types.js";
 
@@ -133,28 +133,6 @@ export function registerImagePaste(pi: ExtensionAPI): void {
       return { action: "continue" as const };
     }
 
-    // ── Drag-drop detection: scan for image file paths ──
-    // Terminal drag-drop sends file paths as text. We detect them by
-    // scanning for paths ending with image extensions.
-    const imagePathRegex = /([\w\-./\\~]+\.(png|jpg|jpeg|webp|gif|bmp))(?:\s|$|\n)/gi;
-    const filePathMatches = event.text.match(imagePathRegex);
-    if (filePathMatches) {
-      for (const match of filePathMatches) {
-        const path = match.trim();
-        if (isImageFilePath(path)) {
-          try {
-            const image = await readFileAsImage(path);
-            if (image && image.bytes.length <= MAX_FILE_SIZE_BYTES) {
-              queueImage(_queue, image, _ctx);
-              _ctx.ui.notify(`Image attached: ${path.split("/").pop()?.split("\\").pop() ?? path}`, "info");
-            }
-          } catch {
-            // Silently skip unreadable files
-          }
-        }
-      }
-    }
-
     // ── Marker matching: use consistent key (trimmed text) ──
     let hasMarkers = false;
     for (const marker of _queue.markers) {
@@ -234,4 +212,5 @@ export function initImagePasteSession(ctx: ExtensionContext): void {
 export function shutdownImagePaste(): void {
   _ctx = null;
   _queue = null;
+  _pasting = false;
 }

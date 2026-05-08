@@ -70,7 +70,6 @@ Paste images from your clipboard directly into your messages:
 - **Ctrl+V** (Linux) / **Alt+V** (Windows) — paste image from clipboard
   - On Linux, Ctrl+V is used exclusively for image paste (pi uses Ctrl+Shift+V for text paste)
   - On Windows, Alt+V is used because the terminal reserves Ctrl+V for text paste
-- **Drag-and-drop** — drop an image file into the editor
 - Images are attached as content blocks and sent to the agent
 - Inline preview renders after submit (controlled by `terminal.showImages` in settings)
 
@@ -155,7 +154,8 @@ src/
 ├── message/index.ts      ← Response time patching
 ├── startup/              ← Animated splash screen (logo, sections, version)
 ├── thinking/             ← Muted thinking block rendering
-└── diff-render/          ← Shiki-powered diff rendering
+├── diff-render/          ← Shiki-powered diff rendering
+└── image-paste/          ← Clipboard image paste and drag-drop
 ```
 
 Each module has a single responsibility and communicates through well-defined interfaces. The main entry point (`index.ts`) is a thin orchestrator that wires modules together.
