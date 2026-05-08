@@ -152,25 +152,16 @@ export function registerImagePaste(pi: ExtensionAPI): void {
 
     // Match markers to images using trimmed key
     const imagesToAttach: PendingImage[] = [];
-    let strippedText = event.text;
 
     for (const marker of _queue.markers) {
       const key = markerKey(marker);
-      if (strippedText.includes(key)) {
+      if (event.text.includes(key)) {
         const pending = _queue.images.find((img) => img.id === marker.id);
         if (pending) {
           imagesToAttach.push(pending);
         }
-        // Replace the key plus any trailing whitespace
-        strippedText = strippedText.replace(
-          new RegExp(key.replace(/[\[\]]/g, "\\$&") + "\\s*"),
-          "",
-        );
       }
     }
-
-    // Clean up extra whitespace/newlines
-    strippedText = strippedText.replace(/\n{3,}/g, "\n\n").trim();
 
     // Clear queue
     _queue.images.length = 0;
@@ -192,7 +183,7 @@ export function registerImagePaste(pi: ExtensionAPI): void {
 
     return {
       action: "transform" as const,
-      text: strippedText,
+      text: event.text,
       images: imagesToAttach.map((img) => ({
         type: "image" as const,
         data: img.base64,

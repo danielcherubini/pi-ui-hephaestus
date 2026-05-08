@@ -48,18 +48,18 @@ export function sendPreviewMessage(
 ): void {
   if (images.length === 0) return;
 
-  pi.sendMessage(
-    {
-      customType: CUSTOM_TYPE,
-      content: "",
-      display: true,
-      details: {
-        images: images.map((img) => ({
-          data: img.base64,
-          mimeType: img.mimeType,
-        })),
+  // Send each image as a separate custom message with image in content
+  // This ensures pi renders the image inline using its built-in image support
+  for (const img of images) {
+    pi.sendMessage(
+      {
+        customType: CUSTOM_TYPE,
+        content: [
+          { type: "image" as const, data: img.base64, mimeType: img.mimeType },
+        ],
+        display: true,
       },
-    },
-    { triggerTurn: false },
-  );
+      { triggerTurn: false },
+    );
+  }
 }
