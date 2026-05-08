@@ -5,7 +5,7 @@ import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-age
 import type { KeyId } from "@mariozechner/pi-tui";
 
 import { readClipboardImage } from "./clipboard.js";
-
+import { registerImagePreview, sendPreviewMessage } from "./preview.js";
 import type { ClipboardImage, PendingImage, ImageMarker } from "./types.js";
 
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
@@ -71,6 +71,9 @@ let _queue: ImageQueue | null = null;
 let _pasting = false;
 
 export function registerImagePaste(pi: ExtensionAPI): void {
+  // Register preview renderer (once)
+  registerImagePreview(pi);
+
   // Register shortcuts (once)
   const pasteImage = async (): Promise<void> => {
     if (_pasting) return; // Mutex: prevent concurrent paste operations
@@ -152,6 +155,13 @@ export function registerImagePaste(pi: ExtensionAPI): void {
 
     if (imagesToAttach.length === 0) {
       return { action: "continue" as const };
+    }
+
+    // Send preview message for TUI display (images are invisible in user messages)
+    try {
+      sendPreviewMessage(pi, imagesToAttach);
+    } catch {
+      // Preview is optional — don't fail the submit
     }
 
     return {

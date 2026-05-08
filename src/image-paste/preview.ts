@@ -16,17 +16,26 @@ export function registerImagePreview(pi: ExtensionAPI): void {
       const fg = (theme as any).fg as ((color: string, text: string) => string) | undefined;
       if (!fg) return undefined;
 
+      // Extract image data from content array
+      const content = message.content;
+      if (!Array.isArray(content) || content.length === 0) return undefined;
+
       const container = new Container();
       container.addChild(new Spacer(1));
-      container.addChild(new Text(fg("muted", "↳ pasted image preview"), 0, 0));
-      container.addChild(new Spacer(1));
-      container.addChild(
-        new Image(message.content as string, "image/png", {
-          fallbackColor: (text: string) => fg("toolOutput", text),
-        }, {
-          maxWidthCells: 60,
-        }),
-      );
+
+      for (const item of content) {
+        if (item.type === "image") {
+          container.addChild(new Spacer(1));
+          container.addChild(
+            new Image(item.data, item.mimeType, {
+              fallbackColor: (text: string) => fg("toolOutput", text),
+            }, {
+              maxWidthCells: 60,
+            }),
+          );
+        }
+      }
+
       return container;
     } catch {
       return undefined;
