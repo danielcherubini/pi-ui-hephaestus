@@ -12,6 +12,11 @@ import { renderHeader, patchStartupListing, ListingRef } from "./startup/index.j
 import { patchConsoleLog } from "./startup/capture.js";
 import { openSettings } from "./settings.js";
 import { loadConfig, type HephaestusConfig } from "./config.js";
+import {
+  registerImagePaste,
+  initImagePasteSession,
+  shutdownImagePaste,
+} from "./image-paste/index.js";
 
 export default function (pi: ExtensionAPI): void {
   // Patch console.log for model scope capture
@@ -19,6 +24,10 @@ export default function (pi: ExtensionAPI): void {
 
   // Register footer
   registerFooter(pi);
+
+  // Register image paste (shortcuts, input handler, preview renderer)
+  // Called once at module load — NOT inside session_start
+  registerImagePaste(pi);
 
   // session_start handler
   pi.on("session_start", (_event, ctx: ExtensionContext) => {
@@ -65,6 +74,9 @@ export default function (pi: ExtensionAPI): void {
     // Register diff-enhanced write/edit tools
     registerDiffTools(pi, () => ctx.ui.theme, () => loadConfig());
 
+    // Initialize image paste queue for this session
+    initImagePasteSession(ctx);
+
     // Register events
     pi.on("message_end", (event, _ctx) => {
       // Transform thinking content (unindent code blocks)
@@ -92,6 +104,9 @@ export default function (pi: ExtensionAPI): void {
 
       // Clear editor component override
       ctx.ui.setEditorComponent(undefined);
+
+      // Clear image paste state
+      shutdownImagePaste();
     });
   });
 

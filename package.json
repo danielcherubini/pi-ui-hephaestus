@@ -3,14 +3,16 @@
   "version": "0.4.1",
   "type": "module",
   "keywords": [
-    "pi-package"
+    "pi-package",
+    "image-paste",
+    "clipboard-image"
   ],
   "scripts": {
     "clean": "echo 'nothing to clean'",
     "build": "echo 'nothing to build'",
     "check": "echo 'nothing to check'"
   },
-  "description": "Muted thinking blocks, framed editor, animated header, response time, and rich footer for pi",
+  "description": "Muted thinking blocks, framed editor, animated header, response time, rich footer, and clipboard image paste for pi",
   "pi": {
     "extensions": [
       "./src/index.ts"

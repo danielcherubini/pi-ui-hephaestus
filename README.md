@@ -63,6 +63,31 @@ When the agent writes or edits files, Hephaestus renders a **Shiki-powered diff*
 - **Auto-derived colors** — diffs adapt to your Pi theme automatically
 - **Graceful degradation** — falls back to plain text if Shiki fails
 
+### 🖼️ Image paste
+
+Paste images from your clipboard directly into your messages:
+
+- **Ctrl+V** (Linux) / **Alt+V** (Windows) — paste image from clipboard
+  - On Linux, Ctrl+V is used exclusively for image paste (pi uses Ctrl+Shift+V for text paste)
+  - On Windows, Alt+V is used because the terminal reserves Ctrl+V for text paste
+- **Drag-and-drop** — drop an image file into the editor
+- Images are attached as content blocks and sent to the agent
+- Inline preview renders after submit (controlled by `terminal.showImages` in settings)
+
+#### Settings
+
+Toggle image preview in `/hephaestus` settings or via `~/.pi/agent/settings.json`:
+
+```json
+{
+  "terminal": {
+    "showImages": true
+  }
+}
+```
+
+When `showImages` is `false`, images are still attached to messages but no inline preview is shown.
+
 ## Quick Start
 
 ```bash
