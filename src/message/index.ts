@@ -113,7 +113,7 @@ export function patchUserMessage(
               lines[i] = line + col + RESET + oscSuffix;
             }
 
-            return idx === 0 ? ["", ...lines] : lines;
+            return ["", ...lines];
           } catch {
             // During /resume, getTheme() may throw — fall back to default render
             return origRender.call(this, width);
