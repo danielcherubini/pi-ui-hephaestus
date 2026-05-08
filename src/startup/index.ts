@@ -1,11 +1,11 @@
-import { VERSION, type Theme } from "@mariozechner/pi-coding-agent";
+import { VERSION, type Theme } from "@earendil-works/pi-coding-agent";
 import { getShinedLogo, TRUECOLOR, LOGO_PAD, LOGO_SETTLE_FRAME } from "./logo.js";
 import { detectSection, parseSectionText, parseModelScope, formatColumns, buildItemWrapper, type ParsedSection, SECTION_KEYS } from "./sections.js";
 import { fetchLatestVersion, compareVersions } from "./version.js";
 import { patchConsoleLog } from "./capture.js";
 import { stripAnsi } from "../utils/ansi.js";
 import { resetInstanceCount } from "../message/index.js";
-import { Text, Spacer, Container, TUI, truncateToWidth, visibleWidth, type Component } from "@mariozechner/pi-tui";
+import { Text, Spacer, Container, TUI, truncateToWidth, visibleWidth, type Component } from "@earendil-works/pi-tui";
 
 // Symbol keys (survive hot-reload)
 const LISTING_REF = Symbol.for("splashscreen:listingRef");

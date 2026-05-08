@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { getAgentDir } from "@mariozechner/pi-coding-agent";
+import { getAgentDir } from "@earendil-works/pi-coding-agent";
 
 // Note: HephaestusConfig does NOT extend HephaestusDiffConfig from diff-render/index.ts
 // because that would create a circular dependency (diff-render imports config via registerDiffTools).

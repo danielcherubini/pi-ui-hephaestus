@@ -1,7 +1,7 @@
 import { clampLine, stripAnsi, gray, rgb, extractRgb, lerp } from "../utils/index.js";
 import { TRUECOLOR } from "./logo.js";
-import type { Theme } from "@mariozechner/pi-coding-agent";
-import { visibleWidth } from "@mariozechner/pi-tui";
+import type { Theme } from "@earendil-works/pi-coding-agent";
+import { visibleWidth } from "@earendil-works/pi-tui";
 
 // ── Types ──────────────────────────────────────────────────────────────
 

@@ -2,14 +2,14 @@ import {
   CustomEditor,
   type Theme,
   type KeybindingsManager,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import {
   type TUI,
   type EditorTheme,
   truncateToWidth,
   isKeyRelease,
   visibleWidth,
-} from "@mariozechner/pi-tui";
+} from "@earendil-works/pi-tui";
 
 import {
   RESET,

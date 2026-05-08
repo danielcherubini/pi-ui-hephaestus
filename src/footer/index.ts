@@ -5,8 +5,8 @@
  *   Line 2: usage stats (↑↓R W $cost + context progress bar)
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { getGitStatus, getWorktreeBranch } from "./utils/git.js";
 import { getContextWindowInfo, getTokenUsageStats } from "./utils/stats.js";
 import { formatContextBar, formatGitStatusIndicators, formatThinkingIndicator, formatTokenCount } from "./utils/format.js";

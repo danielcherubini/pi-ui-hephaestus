@@ -1,7 +1,7 @@
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { KeybindingsManager, getSettingsListTheme } from "@mariozechner/pi-coding-agent";
-import type { Theme } from "@mariozechner/pi-coding-agent";
-import { SettingsList, SettingItem, TUI } from "@mariozechner/pi-tui";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { KeybindingsManager, getSettingsListTheme } from "@earendil-works/pi-coding-agent";
+import type { Theme } from "@earendil-works/pi-coding-agent";
+import { SettingsList, SettingItem, TUI } from "@earendil-works/pi-tui";
 import { loadConfig, saveConfig, DEFAULT_CONFIG, type HephaestusConfig } from "./config.js";
 
 // ── Factory: text submenu ───────────────────────────────────────────────

@@ -1,4 +1,4 @@
-import type { Theme, UserMessageComponent } from "@mariozechner/pi-coding-agent";
+import type { Theme, UserMessageComponent } from "@earendil-works/pi-coding-agent";
 import { RESET, resolvePalette, setThemeBg } from "../chrome.js";
 
 type UserMsgCtor = typeof UserMessageComponent & { [PATCHED]?: boolean };
@@ -42,7 +42,7 @@ export function patchUserMessage(
     lastBg = p.panelBg;
     setThemeBg(theme, "userMessageBg", lastBg);
 
-    import("@mariozechner/pi-coding-agent").then(
+    import("@earendil-works/pi-coding-agent").then(
       ({ UserMessageComponent }: { UserMessageComponent: UserMsgCtor }) => {
         if (UserMessageComponent[PATCHED]) return;
 

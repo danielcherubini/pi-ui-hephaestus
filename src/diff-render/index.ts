@@ -5,7 +5,7 @@
  */
 
 import { existsSync, readFileSync } from "node:fs";
-import type { ExtensionAPI, Theme } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
 
 import { type DiffLine, type ParsedDiff, parseDiff } from "./core/diff.js";
 import * as Ansi from "./ansi.js";
@@ -59,8 +59,8 @@ export function registerDiffTools(
 	(async () => {
 		let createWriteTool: any, createEditTool: any, TextComponent: any;
 		try {
-			const sdk = await import("@mariozechner/pi-coding-agent");
-			const tui = await import("@mariozechner/pi-tui");
+			const sdk = await import("@earendil-works/pi-coding-agent");
+			const tui = await import("@earendil-works/pi-tui");
 			createWriteTool = sdk.createWriteTool;
 			createEditTool = sdk.createEditTool;
 			TextComponent = tui.Text;

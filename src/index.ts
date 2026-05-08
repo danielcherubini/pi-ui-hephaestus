@@ -1,6 +1,6 @@
-import { ExtensionAPI, ExtensionContext, ExtensionCommandContext, KeybindingsManager } from "@mariozechner/pi-coding-agent";
-import type { Theme } from "@mariozechner/pi-coding-agent";
-import { TUI, EditorTheme, Component } from "@mariozechner/pi-tui";
+import { ExtensionAPI, ExtensionContext, ExtensionCommandContext, KeybindingsManager } from "@earendil-works/pi-coding-agent";
+import type { Theme } from "@earendil-works/pi-coding-agent";
+import { TUI, EditorTheme, Component } from "@earendil-works/pi-tui";
 
 import registerFooter from "./footer/index.js";
 import { registerDiffTools } from "./diff-render/index.js";

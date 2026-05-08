@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-import type { KeyId } from "@mariozechner/pi-tui";
+import type { KeyId } from "@earendil-works/pi-tui";
 
 import { readClipboardImage } from "./clipboard.js";
 import { registerImagePreview, sendPreviewMessage } from "./preview.js";

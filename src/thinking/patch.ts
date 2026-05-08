@@ -1,6 +1,6 @@
-import type { Theme } from "@mariozechner/pi-coding-agent";
-import { AssistantMessageComponent } from "@mariozechner/pi-coding-agent";
-import { Markdown, type MarkdownTheme, Spacer, Text } from "@mariozechner/pi-tui";
+import type { Theme } from "@earendil-works/pi-coding-agent";
+import { AssistantMessageComponent } from "@earendil-works/pi-coding-agent";
+import { Markdown, type MarkdownTheme, Spacer, Text } from "@earendil-works/pi-tui";
 import { buildMutedMarkdownTheme } from "./theme.js";
 
 // The label we prepend to visible thinking content.

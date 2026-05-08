@@ -1,4 +1,4 @@
-import { truncateToWidth } from "@mariozechner/pi-tui";
+import { truncateToWidth } from "@earendil-works/pi-tui";
 import { stripSgr } from "./ansi.js";
 
 /** Clamp a line to maxW visible characters, preserving ANSI escapes. */
