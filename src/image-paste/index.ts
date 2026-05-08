@@ -1,29 +1,14 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync, existsSync } from "node:fs";
-import { join } from "node:path";
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { getAgentDir } from "@mariozechner/pi-coding-agent";
+
 import type { KeyId } from "@mariozechner/pi-tui";
 
 import { readClipboardImage } from "./clipboard.js";
-import { registerImagePreview, sendPreviewMessage } from "./preview.js";
+
 import type { ClipboardImage, PendingImage, ImageMarker } from "./types.js";
 
 const MAX_FILE_SIZE_BYTES = 20 * 1024 * 1024; // 20MB
-
-// ── Config ──────────────────────────────────────────────────────
-
-function loadShowImages(): boolean {
-  try {
-    const settingsPath = join(getAgentDir(), "settings.json");
-    if (!existsSync(settingsPath)) return true;
-    const settings = JSON.parse(readFileSync(settingsPath, "utf-8"));
-    return settings?.terminal?.showImages ?? true;
-  } catch {
-    return true;
-  }
-}
 
 // ── Queue management ────────────────────────────────────────────
 
@@ -86,9 +71,6 @@ let _queue: ImageQueue | null = null;
 let _pasting = false;
 
 export function registerImagePaste(pi: ExtensionAPI): void {
-  // Register preview renderer (once)
-  registerImagePreview(pi);
-
   // Register shortcuts (once)
   const pasteImage = async (): Promise<void> => {
     if (_pasting) return; // Mutex: prevent concurrent paste operations
@@ -170,15 +152,6 @@ export function registerImagePaste(pi: ExtensionAPI): void {
 
     if (imagesToAttach.length === 0) {
       return { action: "continue" as const };
-    }
-
-    // Send preview if showImages is enabled
-    if (loadShowImages()) {
-      try {
-        sendPreviewMessage(pi, imagesToAttach);
-      } catch {
-        // Preview is optional — don't fail the submit
-      }
     }
 
     return {
