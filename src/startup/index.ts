@@ -1,5 +1,6 @@
 import { VERSION, type Theme } from "@earendil-works/pi-coding-agent";
 import { getShinedLogo, TRUECOLOR, LOGO_PAD, LOGO_SETTLE_FRAME } from "./logo.js";
+import { loadConfig } from "../config.js";
 import { detectSection, parseSectionText, parseModelScope, formatColumns, buildItemWrapper, type ParsedSection, SECTION_KEYS } from "./sections.js";
 import { fetchLatestVersion, compareVersions } from "./version.js";
 import { patchConsoleLog } from "./capture.js";
@@ -42,7 +43,7 @@ export interface ListingRef {
 export function renderHeader(theme: Theme, ref: ListingRef, width: number, height: number): string[] {
   const dim = (t: string) => theme.fg("dim", t);
   const accent = (t: string) => theme.fg("accent", t);
-  const logoLines = getShinedLogo(ref.frame);
+  const logoLines = getShinedLogo(ref.frame, loadConfig().animationStyle);
 
   // Use cached text lines if settled (no more animations)
   let listingLines: string[];

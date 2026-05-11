@@ -6,12 +6,27 @@ import { getAgentDir } from "@earendil-works/pi-coding-agent";
 // because that would create a circular dependency (diff-render imports config via registerDiffTools).
 // Instead, we define the diff fields inline. The types are structurally compatible —
 // registerDiffTools only reads diffTheme, diffSplitMinWidth, diffSplitMinCodeWidth.
+export const ANIMATION_STYLES = [
+  "diagonal",
+  "top-right",
+  "bottom-left",
+  "bottom-right",
+  "center-out",
+  "wave",
+  "horizontal",
+  "vertical",
+  "vertical-up",
+] as const;
+export type AnimationStyle = (typeof ANIMATION_STYLES)[number];
+
 export interface HephaestusConfig {
   // Thinking settings
   mutedTheme: boolean;
   codeUnindent: boolean;
   labelText: string;
   labelColor: string;
+  // Splashscreen
+  animationStyle: AnimationStyle;
   // Diff settings (structurally compatible with HephaestusDiffConfig)
   diffTheme: string;
   diffSplitMinWidth: number;
@@ -25,6 +40,7 @@ export const DEFAULT_CONFIG: HephaestusConfig = {
   codeUnindent: true,
   labelText: "Thinking...",
   labelColor: "255,215,0",
+  animationStyle: "vertical-up",
   diffTheme: "github-dark",
   diffSplitMinWidth: 150,
   diffSplitMinCodeWidth: 60,

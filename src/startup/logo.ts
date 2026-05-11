@@ -1,4 +1,5 @@
 import { gray, rgb, extractRgb, lerp } from "../utils/index.js";
+import type { AnimationStyle } from "../config.js";
 
 // ── Truecolor detection ────────────────────────────────────────────────
 
@@ -27,7 +28,40 @@ export const LOGO_SETTLE_FRAME = 90;
 export const LOGO_PAD = 0;
 export const LOGO_GAP = 4;
 
-export function getShinedLogo(frame: number): string[] {
+const LOGO_COLS = 14;
+const LOGO_ROWS = 8;
+const CENTER_X = (LOGO_COLS - 1) / 2;
+const CENTER_Y = (LOGO_ROWS - 1) / 2;
+
+function computeRevealAt(x: number, y: number, style: AnimationStyle): number {
+  switch (style) {
+    case "diagonal":
+      return ((x / 2) * 1.2 + (y / 2) * 3.5) * 1.4;
+    case "top-right":
+      return (((LOGO_COLS - 1 - x) / 2) * 1.2 + (y / 2) * 3.5) * 1.4;
+    case "bottom-left":
+      return ((x / 2) * 1.2 + ((LOGO_ROWS - 1 - y) / 2) * 3.5) * 1.4;
+    case "bottom-right":
+      return (((LOGO_COLS - 1 - x) / 2) * 1.2 + ((LOGO_ROWS - 1 - y) / 2) * 3.5) * 1.4;
+    case "center-out": {
+      const dist = Math.sqrt((x - CENTER_X) ** 2 + (y - CENTER_Y) ** 2);
+      return dist * 4.5;
+    }
+    case "wave": {
+      const base = ((x / 2) * 1.2 + (y / 2) * 3.5) * 1.4;
+      const wave = Math.sin((x * 0.8 + y * 0.5) * 1.2) * 8;
+      return base + wave;
+    }
+    case "horizontal":
+      return x * 3.5;
+    case "vertical":
+      return y * 5.5;
+    case "vertical-up":
+      return (LOGO_ROWS - 1 - y) * 5.5;
+  }
+}
+
+export function getShinedLogo(frame: number, style: AnimationStyle = "wave"): string[] {
   if (!TRUECOLOR) return LOGO;
 
   return LOGO.map((line, y) => {
@@ -36,7 +70,7 @@ export function getShinedLogo(frame: number): string[] {
       const char = line[x];
       if (char === " ") { result += " "; continue; }
 
-      const revealAt = ((x / 2) * 1.2 + (y / 2) * 3.5) * 1.4;
+      const revealAt = computeRevealAt(x, y, style);
       const age = frame - revealAt;
 
       if (age <= 0) { result += " "; continue; }

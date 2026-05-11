@@ -143,5 +143,8 @@ export function patchThinkingRenderer(getTheme: () => Theme): void {
         }
       }
     }
+
+    // Bottom padding so next message has breathing room
+    this.contentContainer.addChild(new Spacer(1));
   };
 }

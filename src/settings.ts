@@ -2,7 +2,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { KeybindingsManager, getSettingsListTheme } from "@earendil-works/pi-coding-agent";
 import type { Theme } from "@earendil-works/pi-coding-agent";
 import { SettingsList, SettingItem, TUI } from "@earendil-works/pi-tui";
-import { loadConfig, saveConfig, DEFAULT_CONFIG, type HephaestusConfig } from "./config.js";
+import { loadConfig, saveConfig, DEFAULT_CONFIG, ANIMATION_STYLES, type HephaestusConfig } from "./config.js";
 
 // ── Factory: text submenu ───────────────────────────────────────────────
 
@@ -124,6 +124,13 @@ export function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
         }),
       },
       {
+        id: "animationStyle",
+        label: "Logo Animation",
+        description: "Splashscreen logo reveal style",
+        currentValue: config.animationStyle,
+        values: [...ANIMATION_STYLES],
+      },
+      {
         id: "diffTheme",
         label: "Diff Theme",
         description: "Shiki syntax-highlighting theme for diffs",
@@ -173,6 +180,7 @@ export function openSettings(pi: ExtensionAPI, ctx: ExtensionContext): void {
         case "codeUnindent": config.codeUnindent = newValue === "On"; break;
         case "labelText": config.labelText = newValue; break;
         case "labelColor": config.labelColor = newValue; break;
+        case "animationStyle": config.animationStyle = newValue as any; break;
         case "diffTheme": config.diffTheme = newValue; break;
         case "diffSplitMinWidth": config.diffSplitMinWidth = parseInt(newValue, 10); break;
         case "diffSplitMinCodeWidth": config.diffSplitMinCodeWidth = parseInt(newValue, 10); break;

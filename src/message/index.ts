@@ -97,7 +97,7 @@ export function patchUserMessage(
               " ".repeat(timeRight);
             const emptyTimeCol = p.panelBg + " ".repeat(TIME_COL);
 
-            const firstContent = 1;
+            const firstContent = 0;
 
             for (let i = 0; i < lines.length; i++) {
               let line = lines[i]!;
@@ -113,7 +113,7 @@ export function patchUserMessage(
               lines[i] = line + col + RESET + oscSuffix;
             }
 
-            return ["", ...lines];
+            return lines;
           } catch {
             // During /resume, getTheme() may throw — fall back to default render
             return origRender.call(this, width);
