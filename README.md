@@ -1,3 +1,14 @@
+> ⚠️ **DEPRECATED** — This package is no longer maintained.
+>
+> Please use [`pi-archimedes`](https://github.com/danielcherubini/pi-archimedes) instead, which supersedes this project as a modular monorepo.
+>
+> **Migration:**
+> - Install: `pi install pi-ui-hephaestus` → `pi install pi-archimedes`
+> - Config namespace: `hephaestus.*` → `archimedes.core/diff/footer/image-paste.*`
+> - Same features, plus new packages (`@pi-archimedes/subagent`) and the `/agents` command
+>
+> This repo will be archived on **2026-09-01**.
+
 <div align="center">
   <img src="docs/splash-screen.png" width="600" alt="Hephaestus logo">
 
